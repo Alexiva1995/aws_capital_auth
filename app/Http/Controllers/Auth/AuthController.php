@@ -51,4 +51,27 @@ class AuthController extends Controller
 
         return response()->json(compact('user', 'token'), 201);
     }
+
+    public function login(Request $request)
+    {
+        // $emailEncrypt = $request->email;
+        // $request->merge([
+        //     'email' => Crypt::decrypt($request->email)
+        // ]);
+
+        $credentials = $request->only('email', 'password');
+
+        $user = User::where('email', $request->email)->first();
+
+        if(!$user) {
+            return response()->json(['success' => false, 'message' => 'Email no registrado.', 'em' => null]);
+        }
+
+        if ($token = JWTAuth::attempt($credentials)) {
+
+            return response()->json(['success' => true, 'token' => $token, 'em' => $request->email, 'message' => 'Inicio de sesión exitoso.']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Contraseña incorrecta.', 'em' => null]);
+    }
 }

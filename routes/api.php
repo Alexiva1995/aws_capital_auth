@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 Route::middleware([Seccurity::class])->group(function(){
     Route::post('register',[AuthController::class,'register']);
+    Route::post('login',[AuthController::class,'login']);
 
 });
 

@@ -21,6 +21,7 @@ Route::middleware([Seccurity::class])->group(function(){
     Route::controller(AuthController::class)->group( function($router) {
         Route::post('register', 'register');
         Route::post('login', 'login');
+        Route::post('verify-email', 'verifyEmail');
         Route::post('logout', 'logout');
         Route::post('update-password', 'updatePassword');
         // Ruta que devuelve los datos del usuario autenticado si el token es valido y no ha expirado.

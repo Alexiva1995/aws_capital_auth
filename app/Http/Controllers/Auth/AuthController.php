@@ -121,4 +121,20 @@ class AuthController extends Controller
 
         return response()->json($response, 200);
     }
+    /**
+     * Confirma la creación de la cuenta del usuario y llena el campo email_verified_at
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function verifyEmail(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+        $user->update(['email_verified_at' => now()]);
+        $response = [
+            'status' => 'success',
+            'message' => 'Correo verificado exitosamente',
+            'time' => $user->email_verified_at
+        ];
+        return response()->json($response, 200);
+    }
 }

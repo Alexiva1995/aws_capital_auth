@@ -15,12 +15,17 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+// El middleare Seccurity valida que las peticiones vengan del backend AWS
 Route::middleware([Seccurity::class])->group(function(){
-    Route::post('register',[AuthController::class,'register']);
-    Route::post('login',[AuthController::class,'login']);
+
+    Route::controller(AuthController::class)->group( function($router) {
+        Route::post('register', 'register');
+        Route::post('login', 'login');
+        Route::post('logout', 'logout');
+        Route::post('update-password', 'updatePassword');
+        // Ruta que devuelve los datos del usuario autenticado si el token es valido y no ha expirado.
+        Route::get('me','me');
+    });
 
 });
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});

@@ -19,6 +19,11 @@ use Str;
 
 class AuthController extends Controller
 {
+    /**
+     * Registra a un nuevo usuario
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -36,8 +41,6 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            Log::debug('La validacion fallo');
-            Log::debug($validator->errors());
             return response()->json($validator->errors()->toJson(), 400);
         }
         $data = $validator->validated();
@@ -45,20 +48,13 @@ class AuthController extends Controller
 
         $user = User::create($data);
 
-        $token = JWTAuth::fromUser($user);
+        // $token = JWTAuth::fromUser($user);
 
-        Log::debug('Usuario registrado');
-
-        return response()->json(compact('user', 'token'), 201);
+        return response()->json(['user' => $user], 201);
     }
 
     public function login(Request $request)
     {
-        // $emailEncrypt = $request->email;
-        // $request->merge([
-        //     'email' => Crypt::decrypt($request->email)
-        // ]);
-
         $credentials = $request->only('email', 'password');
 
         $user = User::where('email', $request->email)->first();
@@ -69,9 +65,60 @@ class AuthController extends Controller
 
         if ($token = JWTAuth::attempt($credentials)) {
 
-            return response()->json(['success' => true, 'token' => $token, 'em' => $request->email, 'message' => 'Inicio de sesión exitoso.']);
+            return response()->json(['success' => true, 'token' => $token, 'em' => $request->email, 'message' => 'Inicio de sesión exitoso.'],200);
         }
 
-        return response()->json(['success' => false, 'message' => 'Contraseña incorrecta.', 'em' => null]);
+        return response()->json(['success' => false, 'message' => 'Contraseña incorrecta.', 'em' => null],400);
+    }
+    /**
+     * Obtiene el token JWT y valida. Comprueba si es tun token valido. (Cumple la función de middleware)
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function me(Request $request)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+
+            return response()->json(['status' => 'success', 'user' => $user],200);
+            
+        } catch (Exception $th) {
+
+            if($e instanceof TokenInvalidException) {
+                return response()->json(['status' => 'invalid token'],401);
+            }
+
+            if($e instanceof TokenExpiredException){
+                return response()->json(['status' => 'expired token'],401);
+            }
+            return response()->json(['status' => 'token not found'],401);
+        }
+
+    }
+    /**
+     * Invalida el token JWT del usuario para cerrar sesión
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout()
+    {
+        JWTAuth::parseToken()->invalidate();
+
+        return response()->json(['status' => 'success', 'message' => 'ha cerrado la sesión exitosamente'],200);
+    }
+    /**
+     * Actualiza la password del usuario
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+
+        $user->update(['password' => Hash::make($request->password)]);
+
+        $response = ['status' => 'success', 'message' => 'Su contraseña ha sido actualizada con exito'];
+
+        return response()->json($response, 200);
     }
 }

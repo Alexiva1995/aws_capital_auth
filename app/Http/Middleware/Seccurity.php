@@ -18,7 +18,8 @@ class Seccurity
     {
         if ( $request->header('apikey') != config('services.auth.key') ) 
         {
-            abort(403, "api_key dont match.");
+            return response()->json(['error' => 'api_key dont match'], 403);
+            // abort(403, "api_key dont match.");
         }
         return $next($request);
     }

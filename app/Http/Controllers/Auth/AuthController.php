@@ -60,12 +60,12 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if(!$user) {
-            return response()->json(['success' => false, 'message' => 'Email no registrado.', 'em' => null]);
+            return response()->json(['success' => false, 'message' => 'Email no registrado.', 'em' => null],400);
         }
 
         if ($token = JWTAuth::attempt($credentials)) {
 
-            return response()->json(['success' => true, 'token' => $token, 'em' => $request->email, 'message' => 'Inicio de sesión exitoso.'],200);
+            return response()->json(['success' => true, 'token' => $token, 'em' => $request->email, 'message' => 'Inicio de sesión exitoso.'],400);
         }
 
         return response()->json(['success' => false, 'message' => 'Contraseña incorrecta.', 'em' => null],400);

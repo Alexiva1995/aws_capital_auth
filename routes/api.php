@@ -26,6 +26,10 @@ Route::middleware([Seccurity::class])->group(function(){
         Route::post('update-password', 'updatePassword');
         // Ruta que devuelve los datos del usuario autenticado si el token es valido y no ha expirado.
         Route::get('me','me');
+        Route::post('change-data', 'ChangeData');
+        Route::post('check-credentials-email', 'CheckCredentials');
+        Route::post('check-password', 'CheckPassword');
+        Route::post('change-password', 'ChangePassword');
     });
 
 });

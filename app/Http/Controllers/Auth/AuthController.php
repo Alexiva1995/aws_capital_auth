@@ -137,4 +137,69 @@ class AuthController extends Controller
         ];
         return response()->json($response, 200);
     }
+
+    public function ChangeData(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors()->toJson(), 400);
+        }
+
+        $user = User::find($request->id);
+
+        $request->name == null || $request->name == ''
+            ? $user->name = $user->name
+            : $user->name = $request->name;
+
+        $request->last_name == null || $request->last_name == ''
+            ? $user->last_name = $user->last_name
+            : $user->last_name = $request->last_name;
+
+        $request->email == null || $request->email == ''
+            ? $user->email = $user->email
+            : $user->email = $request->email;
+
+        $user->update();
+
+        $response = ['status' => 'success', 'message' => 'Datos actualizados'];
+
+        return response()->json($response, 200);
+    }
+
+    public function CheckCredentials(Request $request) {
+        $user = User::find($request->id);
+
+        if ((strcmp($request->email, $user->email) === 0) && (Hash::check($request->password, $user->password))) {
+                $response = ['status' => 'success', 'message' => 'Datos actualizados'];
+
+                return response()->json($response, 200);
+            } else {
+                return response()->json('No coinciden sus credenciales de AWS Capital', 422); 
+            }
+    }
+
+    public function CheckPassword(Request $request) {
+        $user = User::find($request->id);
+        return response()->json(['password' => $user->password], 200);
+    }
+
+    public function ChangePassword(Request $request) {
+        $user = User::find($request->id);
+
+        $user->update([
+         'password' => Hash::make($request->password)
+        ]);
+
+        $response = [
+            'status' => 'success',
+            'message' => 'Correo actualizado',
+            'user_id' => $request->id,
+        ];
+
+        return response()->json($response, 200);
+    }
 }

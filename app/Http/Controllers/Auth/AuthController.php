@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
@@ -16,6 +17,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Log;
 use Str;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 class AuthController extends Controller
 {
@@ -60,12 +63,12 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if(!$user) {
-            return response()->json(['success' => false, 'message' => 'Email no registrado.', 'em' => null],400);
+            return response()->json(['success' => false, 'message' => 'Email no registrado.', 'em' => null]);
         }
 
         if ($token = JWTAuth::attempt($credentials)) {
 
-            return response()->json(['success' => true, 'token' => $token, 'em' => $request->email, 'message' => 'Inicio de sesión exitoso.'],400);
+            return response()->json(['success' => true, 'token' => $token, 'em' => $request->email, 'message' => 'Inicio de sesión exitoso.'],200);
         }
 
         return response()->json(['success' => false, 'message' => 'Contraseña incorrecta.', 'em' => null],400);
@@ -82,7 +85,7 @@ class AuthController extends Controller
 
             return response()->json(['status' => 'success', 'user' => $user],200);
             
-        } catch (Exception $th) {
+        } catch (Exception $e) {
 
             if($e instanceof TokenInvalidException) {
                 return response()->json(['status' => 'invalid token'],401);
@@ -117,7 +120,7 @@ class AuthController extends Controller
 
         $user->update(['password' => Hash::make($request->password)]);
 
-        $response = ['status' => 'success', 'message' => 'Su contraseña ha sido actualizada con exito'];
+        $response = ['status' => true, 'message' => 'Su contraseña ha sido actualizada con exito'];
 
         return response()->json($response, 200);
     }
